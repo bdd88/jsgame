@@ -1,3 +1,8 @@
+// 1 pixel = 1 cm
+// 100 pixels = 1 m
+// Gravity is 9.81 meters per second squared.
+const GRAVITY = 981;
+
 class game {
     activePixels = [];
     time;
@@ -7,6 +12,9 @@ class game {
     grid;
     weather;
     pixelCount = 0;
+    mouseX = 0;
+    mouseY = 0;
+    timestep = null;
 
     DIRECTION_OFFSETS = {
         upLeft:    [-1, -1],
@@ -20,6 +28,8 @@ class game {
         downRight: [ 1,  1]
     };
 
+    MOVEMENT_DIRECTIONS = ["upLeft", "up", "upRight", "left", "right", "downLeft", "down", "downRight"];
+
 
     constructor() {
 
@@ -32,6 +42,7 @@ class game {
 
         this.mouseClickHeld = false;
         this.grid = this.createPixelGrid(1000, 1000);
+        this.timestep = 1000 / this.tickrate;
         this.time = 0;
         this.frame = 0;
         this.framesLate = 0;
@@ -92,6 +103,7 @@ class game {
     }
 
     getGridObject(x, y) {
+        //console.log("getGridObject" + x + " " + y);
         if (typeof this.grid[x][y] == 'undefined') {
             return null;
         } else {
@@ -143,55 +155,96 @@ class game {
     updateFrame() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.createPixels();
-        this.applyPhysics();
-        this.displayFPS([10,100], 25);
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                let pixel = this.getGridObject(x, y);
-                if (pixel != null) {
-                    this.drawPixel(x, y, pixel.color);
-                }
-            }
+        this.displayFPS([5,25], 25);
+        let updated = [];
+        while (this.activePixels.length > 0) {
+            const pixel = this.activePixels.pop();
+            pixel.addVelocity(0, GRAVITY * this.timeStep);
         }
     }
 
     createPixels() {
         if (this.mouseClickHeld === true) {
             //console.log('Spawning...');
-            if (this.look(this.mouseX, this.mouseY, 'center') === true) {
-                this.setGridObject(this.mouseX, this.mouseY, new sand());
+            const x = this.mouseX;
+            const y = this.mouseY;
+            if (this.look(x, y, 'center') === true) {
+                this.setGridObject(x, y, new sand());
+                this.activePixels.push([x, y]);
             }
         }
 
-        let randomNumber = this.generateRandomNumber(0,1000);
+        const randomNumber = this.generateRandomNumber(0,1000);
         const waterDrop = this.setGridObject(randomNumber, 1, new water());
+        this.activePixels.push(randomNumber, 1);
         if (waterDrop === true) {
             this.pixelCount += 1;
         }
     }
 
+    mouseDisplacement(size) {
+        const x = this.mouseX;
+        const y = this.mouseY;
+        // Only displace if we are actually on the canvas.
+        if (x < (this.width) &&
+            y < (this.height) && 
+            x >= 0 &&
+            y >= 0
+        ) {
+            const pixel = this.getGridObject(x, y);
+            if (pixel != null) {
+                console.log("Displacing at: " + x + " " + y);
+                // move downLeft or downRight
+                this.moveDownward(x, y);
+                // move left or right
+                // move upLeft or upRight
+                // move up
+            }
+        }
+    }
+
+    // Move a pixel down, or a 50/50 chance of downLeft/downRight.
+    moveDownward(x, y) {
+        if (this.look(x, y, 'down') === true) {
+            //console.log("Moving pixel down: " + x + " " + y);
+            this.move(x, y, 'down');
+        } else {
+            let downLeft = this.look(x, y, 'downLeft');
+            let downRight = this.look(x, y, 'downRight');
+            if (downLeft === true && downRight === true) {
+                const direction = Math.random() < 0.5 ? 'downLeft' : 'downRight';
+                this.move(x, y, direction);
+                return true
+            } else if (downLeft === true) {
+                this.move(x, y, 'downLeft');
+                return true;
+            } else if (downRight === true) {
+                this.move(x, y, 'downRight');
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    moveSideways(x, y) {
+
+    }
+
+    moveUpward() {
+
+    }
+
+
     applyPhysics() {
+        //console.log("applying physics");
         // Re-use a single buffer array for position lookups, to avoid creating new arrays ad-nauseum.
         let targetPos = [];
         for (let y = 999; y > 0; y--) {
             for (let x = 999; x > 0; x--) {
                 let pixelObject = this.getGridObject(x, y);
                 if (pixelObject != null) {
-                    targetPos = this.getRelativePos(x, y, 'down', targetPos);
-                    if (this.look(x, y, 'down') === true) {
-                        this.move(x, y, 'down');
-                    } else {
-                        let downLeft = this.look(x, y, 'downLeft');
-                        let downRight = this.look(x, y, 'downRight');
-                        if (downLeft === true && downRight === true) {
-                            const direction = Math.random() < 0.5 ? 'downLeft' : 'downRight';
-                            this.move(x, y, direction);
-                        } else if (downLeft === true) {
-                            this.move(x, y, 'downLeft');
-                        } else if (downRight === true) {
-                            this.move(x, y, 'downRight');
-                        }
-                    }
+                    this.moveDownward(x, y);
                 }
             }
         }
@@ -208,32 +261,50 @@ class game {
     this.ctx.fillText(pixels, pos[0], pos[1] + size);
     }
 
-    getFrameTime(frameNumber) {
-        const msPerFrame = 1000 / this.tickrate;
-        let nextUpdateTime = Math.floor(frameNumber * msPerFrame);
-        return nextUpdateTime;
-    }
-
     main(currentTime) {
-        if (currentTime >= this.getFrameTime(this.frame)) {
+        if (currentTime >= (this.frame * this.timestep)) {
             this.updateFrame();
-            if (currentTime >= this.getFrameTime(this.frame + 1)) {
+            this.frame += 1;
+            if (currentTime >= (this.frame + 1) * this.timestep) {
                 this.framesLate += 1;
             }
-            this.frame += 1;
         }
-        //console.log("Frame:" + this.frame + " | Time:" + Math.floor(currentTime / 1000) + " | FPS:" + Math.floor(this.frame / (currentTime / 1000)) + " | Lag:" + this.framesLate);
         this.time = currentTime;
         window.requestAnimationFrame(this.main);
     }
 
 }
 
-class matter {
+class physicsObject {
+    velocityX = 0;
+    velocityY = 0;
+    positionX = null;   
+    positionY = null;
+
+    addVelocity(x, y) {
+        this.velocityX += x;
+        this.velocityY += y;
+    }
+
+    multVelocity(x, y) {
+        this.velocityX *= x;
+        this.velocityY *= y;
+    }
+
+    updatePosition(time) {
+        this.positionX += this.velocityX * time;
+        this.positionY += this.velocityY * time;
+        return true;
+    }
+}
+
+class matter extends physicsObject {
     name = null;
     type = "matter";
     color = null;
-    velocity = 0;
+    x = null;
+    y = null;
+    direction = 0;
 }
 
 class sand extends matter {
@@ -256,7 +327,7 @@ class rainstorm extends weather {
     frequency = 1;
 }
 
-class liquid {
+class liquid extends matter {
     type = "liquid";
     spread = 10;
 }
