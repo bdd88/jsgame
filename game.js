@@ -1,269 +1,167 @@
+import {physicsObject} from './physics.js';
+import {mouse} from './mouse.js';
+import {draw} from './draw.js';
+import {stats} from './stats.js';
+import {util} from './util.js';
+import * as weather from './weather.js';
+import * as matter from './matter.js';
+
 class game {
-    activePixels = [];
-    time;
+    // Customizable properties:
     width = 1000;
     height = 1000;
     tickrate = 120;
-    grid;
-    weather;
+
+    // Default values and properties.
+    time = 0;
+    previousTime = 0;
+    frames = 0;
     pixelCount = 0;
-
-    DIRECTION_OFFSETS = {
-        upLeft:    [-1, -1],
-        up:        [ 0, -1],
-        upRight:   [ 1, -1],
-        left:      [-1,  0],
-        center:    [ 0,  0],
-        right:     [ 1,  0],
-        downLeft:  [-1,  1],
-        down:      [ 0,  1],
-        downRight: [ 1,  1]
-    };
-
+    canvas;
+    ctx;
+    pixelMap;
+    activePixels;
+    draw;
+    util;
+    matter;
+    weather;
+    stats;
+    mouse;
 
     constructor() {
+        // .bind(this) is used (on listeners and the main loop) to keep 'this' references consistent throughout the code.
 
+        // Configure the canvas and utility objects.
         this.canvas = document.getElementById("game");
         this.ctx = this.canvas.getContext("2d");
+        this.draw = new draw(this.ctx);
+        this.util = new util();
+        this.stats = new stats(this.ctx);
+        this.pixelMap = new Map();
+        this.activePixels = new Set();
 
-        document.addEventListener('mousedown', this.mouseClickPress.bind(this))
-        document.addEventListener('mouseup', this.mouseClickRelease.bind(this))
-        document.addEventListener('mousemove', this.mouseMove.bind(this))
+        // Setup mouse and keyboard.
+        this.mouse = new mouse(this.canvas);
+        document.addEventListener('mousedown', (e) => this.mouse.press(e));
+        document.addEventListener('mouseup', (e) => this.mouse.release(e));
+        document.addEventListener('mousemove', (e) => this.mouse.move(e));
 
-        this.mouseClickHeld = false;
-        this.grid = this.createPixelGrid(1000, 1000);
-        this.time = 0;
-        this.frame = 0;
-        this.framesLate = 0;
+        // Start the main animation loop.
         this.main = this.main.bind(this);
         window.requestAnimationFrame(this.main);
     }
 
-    generateRandomNumber(min, max) {
-        return Math.floor(Math.random() * max) + min;
-    }
-
-    createPixelGrid(width, height) {
-        const grid = Array.from({ length: width }, () => 
-            Array.from({ length: height }, () => 
-                null
-            )
-        );
-        return grid;
-    }
-
-    getMousePos(e) {
-        let canvasPos = this.canvas.getBoundingClientRect();
-        let x = e.clientX - canvasPos.left;
-        let y = e.clientY - canvasPos.top;
-        let pos = [x, y];
-        return pos;
-    }
-
-    mouseClickPress(e) {
-        this.mouseClickHeld = true;
-    }
-
-    mouseClickRelease(e) {
-        this.mouseClickHeld = false;
-    }
-
-    mouseMove(e) {
-        let canvasPos = this.canvas.getBoundingClientRect();
-        this.mouseX = e.clientX - canvasPos.left;
-        this.mouseY = e.clientY - canvasPos.top;
-    }
-
-    drawPixel(x, y, color) {
-        this.drawRectangle(x, y, 1, 1, color);
-    }
-
-    drawLine(xStart, yStart, xStop, yStop, color) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(xStart, yStart);
-        this.ctx.lineTo(xStop, yStop);
-        this.ctx.strokeStyle = color;
-        this.ctx.stroke();
-    }
-
-    drawRectangle(x, y, width, height, color) {
-        this.ctx.fillStyle = color;
-        this.ctx.fillRect(x, y, width, height);
-    }
-
-    getGridObject(x, y) {
-        if (typeof this.grid[x][y] == 'undefined') {
-            return null;
+    addPixel(pixel) {
+        const key = pixel.x + ',' + pixel.y;
+        if (this.pixelMap.has(key) === false) {
+            this.pixelMap.set(key, pixel);
+            this.activePixels.add(pixel);
+            return true;
         } else {
-            return this.grid[x][y];
+            return false;
         }
     }
 
-    setGridObject(x, y, object) {
-        //console.log(x + " " + y);
-        this.grid[x][y] = object;
-        return true;
+    // Manually move a pixel to a given position.
+    movePixel(x, y, targetX, targetY) {
+        const key = x + ',' + y;
+        const targetKey = targetX + ',' + targetY;
+        if (pixelMap.has(key) === true) {
+            const pixel = this.pixelMap.get(key);
+            pixel.posX = targetX;
+            pixel.posY = targetY;
+            this.pixelMap.delete(key);
+            this.pixelMap.set(targetKey, object);
+            this.activePixels.add(object);
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    getRelativePos(x, y, direction, buffer) {
-        const offset = this.DIRECTION_OFFSETS[direction];
-        buffer[0] = x + offset[0];
-        buffer[1] = y + offset[1];
-        return buffer;
+    updatePixelMap(x, y, targetX, targetY) {
+        const key = x + ',' + y;
+        const newKey = targetX + "," + targetY;
+        if (this.pixelMap.has(key)) {
+            const pixel = this.pixelMap.get(key);
+            this.pixelMap.delete(key);
+            this.pixelMap.set(newKey, pixel);
+            this.activePixels.add(pixel);
+            //TODO: activePixels need to be de-activated at some point.
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    look(x, y, direction) {
-        let targetPos = [];
-        targetPos = this.getRelativePos(x, y, direction, targetPos);
 
-        // Stop at the bounds of the screen.
-        if (targetPos[0] >= (this.width - 1) ||
-            targetPos[1] >= (this.height - 1) || 
-            targetPos[0] <= 0 ||
-            targetPos[1] <= 0
+    // Remove all references to a pixel object.
+    deletePixel(pixel) {
+        const key = pixel.x + ',' + pixel.y;
+        if (this.pixelMap.has(key) === true) {
+            this.pixelMap.delete(key);
+            this.activePixels.delete(pixel);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Create a new pixel objects.
+    spawnPixels() {
+        // Create pixels when the mouse is click and held.
+        if (this.mouse.clickHeld == true) {
+            const granule = new matter.sand(this.mouse.x, this.mouse.y, 0, 0);
+            this.addPixel(granule);
+        }
+
+        // Simulate weather.
+        for (let dropletCount = 0; dropletCount < this.util.genRandNum(1,30); dropletCount++) {
+            const x = this.util.genRandNum(0,1000);
+            //const y = this.util.genRandNum(1,30);
+            const droplet = new matter.water(x, 0, 0, 0);
+            this.addPixel(droplet);
+        }
+    }
+
+    checkPath(x, y, targetX, target) {
+
+    }
+
+    applyPhysics(pixel, timestep) {
+        const x1 = pixel.x;
+        const y1 = pixel.y;
+        pixel.applyPhysics(timestep);
+        this.updatePixelMap(x1, y1, pixel.x, pixel.y);
+        if (pixel.x < 0 ||
+            pixel.x > 999 ||
+            pixel.y < 0 ||
+            pixel.y > 999
         ) {
-            return false;
+            this.deletePixel(pixel);
         }
-
-        // See if the space is empty.
-        if (this.getGridObject(targetPos[0], targetPos[1]) != null) {
-            return false;
-        }
-
-        return true;
     }
 
-    move(x, y, direction) {
-        let targetPos = [];
-        targetPos = this.getRelativePos(x, y, direction, targetPos);
-        this.setGridObject(targetPos[0], targetPos[1], this.getGridObject(x, y));
-        this.setGridObject(x, y, null);
-    }
-
-    updateFrame() {
+    updateFrame(currentTime) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.createPixels();
-        this.applyPhysics();
-        this.displayFPS([10,100], 25);
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                let pixel = this.getGridObject(x, y);
-                if (pixel != null) {
-                    this.drawPixel(x, y, pixel.color);
-                }
-            }
-        }
-    }
-
-    createPixels() {
-        if (this.mouseClickHeld === true) {
-            //console.log('Spawning...');
-            if (this.look(this.mouseX, this.mouseY, 'center') === true) {
-                this.setGridObject(this.mouseX, this.mouseY, new sand());
-            }
-        }
-
-        let randomNumber = this.generateRandomNumber(0,1000);
-        const waterDrop = this.setGridObject(randomNumber, 1, new water());
-        if (waterDrop === true) {
-            this.pixelCount += 1;
-        }
-    }
-
-    applyPhysics() {
-        // Re-use a single buffer array for position lookups, to avoid creating new arrays ad-nauseum.
-        let targetPos = [];
-        for (let y = 999; y > 0; y--) {
-            for (let x = 999; x > 0; x--) {
-                let pixelObject = this.getGridObject(x, y);
-                if (pixelObject != null) {
-                    targetPos = this.getRelativePos(x, y, 'down', targetPos);
-                    if (this.look(x, y, 'down') === true) {
-                        this.move(x, y, 'down');
-                    } else {
-                        let downLeft = this.look(x, y, 'downLeft');
-                        let downRight = this.look(x, y, 'downRight');
-                        if (downLeft === true && downRight === true) {
-                            const direction = Math.random() < 0.5 ? 'downLeft' : 'downRight';
-                            this.move(x, y, direction);
-                        } else if (downLeft === true) {
-                            this.move(x, y, 'downLeft');
-                        } else if (downRight === true) {
-                            this.move(x, y, 'downRight');
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    displayFPS(pos, size) {
-    //let text = "Frame:" + this.frame + " | Time:" + Math.floor(this.time / 1000) + " | FPS:" + Math.floor(this.frame / (this.time / 1000)) + " | Lag:" + this.framesLate
-    const fps = "FPS: " + Math.floor(this.frame / (this.time / 1000))
-    const pixels = "Pixels: " + this.pixelCount;
-    let displayText = fps + " " + pixels;
-    this.ctx.fillStyle = 'black';
-    this.ctx.font = size + "px Arial";
-    this.ctx.fillText(fps, pos[0], pos[1]);
-    this.ctx.fillText(pixels, pos[0], pos[1] + size);
-    }
-
-    getFrameTime(frameNumber) {
-        const msPerFrame = 1000 / this.tickrate;
-        let nextUpdateTime = Math.floor(frameNumber * msPerFrame);
-        return nextUpdateTime;
+        this.spawnPixels();
+        const timestep = (currentTime - this.previousTime) / 1000;
+        this.activePixels.forEach(pixel => this.applyPhysics(pixel, timestep));
+        this.stats.displayFPS(10, 25, 25);
+        this.draw.drawPixelMap(this.pixelMap);
     }
 
     main(currentTime) {
-        if (currentTime >= this.getFrameTime(this.frame)) {
-            this.updateFrame();
-            if (currentTime >= this.getFrameTime(this.frame + 1)) {
-                this.framesLate += 1;
-            }
-            this.frame += 1;
+        if (this.frames > 5000) {
+            return;
         }
-        //console.log("Frame:" + this.frame + " | Time:" + Math.floor(currentTime / 1000) + " | FPS:" + Math.floor(this.frame / (currentTime / 1000)) + " | Lag:" + this.framesLate);
-        this.time = currentTime;
+        this.stats.update(currentTime, this.frames, this.pixelMap.size);
+        this.updateFrame(currentTime);
+        this.previousTime = currentTime;
+        this.frames += 1;
         window.requestAnimationFrame(this.main);
     }
 
-}
-
-class matter {
-    name = null;
-    type = "matter";
-    color = null;
-    velocity = 0;
-}
-
-class sand extends matter {
-    name = "sand";
-    color = "red";
-}
-
-class weather {
-    type = "weather";
-}
-
-class snow extends weather {
-    name = "snow";
-    color = "grey";
-}
-
-class rainstorm extends weather {
-    name = "rain";
-    material = water;
-    frequency = 1;
-}
-
-class liquid {
-    type = "liquid";
-    spread = 10;
-}
-
-class water extends liquid {
-    name = "water";
-    color = "blue";
 }
 
 const gameInstance = new game();
