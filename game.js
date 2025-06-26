@@ -116,10 +116,12 @@ class game {
         }
 
         // Simulate weather.
-        for (let dropletCount = 0; dropletCount < this.util.genRandNum(1,30); dropletCount++) {
-            const x = this.util.genRandNum(0,1000);
-            //const y = this.util.genRandNum(1,30);
-            const droplet = new matter.water(x, 0, 0, 0);
+        for (let dropletCount = 0; dropletCount < this.util.genRandNum(20,100); dropletCount++) {
+            const x = this.util.genRandNum(-150,999);
+            const y = this.util.genRandNum(0,0);
+            const xv = this.util.genRandNum(15,50);
+            const yv = this.util.genRandNum(150,300);
+            const droplet = new matter.water(x, y, xv, yv);
             this.addPixel(droplet);
         }
     }
@@ -133,11 +135,7 @@ class game {
         const y1 = pixel.y;
         pixel.applyPhysics(timestep);
         this.updatePixelMap(x1, y1, pixel.x, pixel.y);
-        if (pixel.x < 0 ||
-            pixel.x > 999 ||
-            pixel.y < 0 ||
-            pixel.y > 999
-        ) {
+        if (pixel.y > 999) {
             this.deletePixel(pixel);
         }
     }

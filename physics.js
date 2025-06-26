@@ -17,7 +17,7 @@ export class physicsObject {
         this.x = x;
         this.y = y;
         this.xv = xv;
-        this.xy = yv;
+        this.yv = yv;
     }
 
     addVelocity(xv, yv) {
@@ -33,7 +33,7 @@ export class physicsObject {
     
     applyPhysics(timestep) {
         // Account for gravity and time.
-        this.addVelocity(0, this.gravity * timestep);
+        this.addVelocity(0, (this.gravity * timestep));
         this.x = this.x + (this.xv * timestep);
         this.y = this.y + (this.yv * timestep);
     }
