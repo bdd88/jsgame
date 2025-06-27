@@ -39,6 +39,7 @@ class game {
         this.stats = new stats(this.ctx);
         this.pixelMap = new Map();
         this.activePixels = new Set();
+        this.activeWeathers = new Set();
 
         // Setup mouse and keyboard.
         this.mouse = new mouse(this.canvas);
@@ -49,6 +50,11 @@ class game {
         // Start the main animation loop.
         this.main = this.main.bind(this);
         window.requestAnimationFrame(this.main);
+    }
+
+    enableWeather(classRef) {
+        const newWeather = new classRef(this.util);
+        this.activeWeathers.add(newWeather);
     }
 
     addPixel(pixel) {
@@ -109,21 +115,19 @@ class game {
 
     // Create a new pixel objects.
     spawnPixels() {
-        // Create pixels when the mouse is click and held.
+        // Create pixels when mouse click is held.
         if (this.mouse.clickHeld == true) {
             const granule = new matter.sand(this.mouse.x, this.mouse.y, 0, 0);
             this.addPixel(granule);
         }
 
-        // Simulate weather.
-        for (let dropletCount = 0; dropletCount < this.util.genRandNum(20,100); dropletCount++) {
-            const x = this.util.genRandNum(-150,999);
-            const y = this.util.genRandNum(0,0);
-            const xv = this.util.genRandNum(15,50);
-            const yv = this.util.genRandNum(150,300);
-            const droplet = new matter.water(x, y, xv, yv);
-            this.addPixel(droplet);
-        }
+        // Spawn pixels from weather.
+        this.activeWeathers.forEach(currWeather => {
+                const newPixels = currWeather.spawnMaterials();
+                newPixels.forEach(newPixel => {
+                    this.addPixel(newPixel);
+                });
+        });
     }
 
     checkPath(x, y, targetX, target) {
@@ -162,4 +166,8 @@ class game {
 
 }
 
+// Start the game.
 const gameInstance = new game();
+
+// Start raining.
+const raintstorm = gameInstance.enableWeather(weather.rainstorm);
