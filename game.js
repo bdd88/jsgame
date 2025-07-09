@@ -1,173 +1,100 @@
 import {physicsObject} from './physics.js';
 import {mouse} from './mouse.js';
+import {keyboard} from './keyboard.js';
 import {draw} from './draw.js';
 import {stats} from './stats.js';
 import {util} from './util.js';
 import * as weather from './weather.js';
 import * as matter from './matter.js';
+import {pauseButton} from './menu.js';
+import {entities} from './entities.js';
+import {controls} from './controls.js';
 
 class game {
-    // Customizable properties:
     width = 1000;
     height = 1000;
-    tickrate = 120;
+    framerateLimit = 200;
 
-    // Default values and properties.
-    time = 0;
-    previousTime = 0;
     frames = 0;
-    pixelCount = 0;
     canvas;
     ctx;
-    pixelMap;
-    activePixels;
     draw;
     util;
     matter;
     weather;
     stats;
     mouse;
+    keyboard;
+    entities;
+    timestep;
+    nextFrameTime;
 
-    constructor() {
-        // .bind(this) is used (on listeners and the main loop) to keep 'this' references consistent throughout the code.
-
-        // Configure the canvas and utility objects.
-        this.canvas = document.getElementById("game");
+    /**
+     * @param {HTMLElement} canvas 
+     */
+    constructor(canvas) {
+        this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d");
         this.draw = new draw(this.ctx);
-        this.util = new util();
         this.stats = new stats(this.ctx);
-        this.pixelMap = new Map();
-        this.activePixels = new Set();
-        this.activeWeathers = new Set();
-
-        // Setup mouse and keyboard.
+        this.util = new util();
         this.mouse = new mouse(this.canvas);
-        document.addEventListener('mousedown', (e) => this.mouse.press(e));
-        document.addEventListener('mouseup', (e) => this.mouse.release(e));
-        document.addEventListener('mousemove', (e) => this.mouse.move(e));
+        this.keyboard = new keyboard();
+        this.controls = new controls(this.mouse, this.keyboard);
+        this.entities = new entities(this.util);
+        //TODO: this.pauseButtom = new pauseButton(this.mouse, this.draw, this.togglePause, []);
 
         // Start the main animation loop.
-        this.main = this.main.bind(this);
+        this.timestep = 1000 / this.framerateLimit;
+        this.nextFrameTime = 0;
         window.requestAnimationFrame(this.main);
     }
 
-    enableWeather(classRef) {
-        const newWeather = new classRef(this.util);
-        this.activeWeathers.add(newWeather);
-    }
-
-    addPixel(pixel) {
-        const key = pixel.x + ',' + pixel.y;
-        if (this.pixelMap.has(key) === false) {
-            this.pixelMap.set(key, pixel);
-            this.activePixels.add(pixel);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // Manually move a pixel to a given position.
-    movePixel(x, y, targetX, targetY) {
-        const key = x + ',' + y;
-        const targetKey = targetX + ',' + targetY;
-        if (pixelMap.has(key) === true) {
-            const pixel = this.pixelMap.get(key);
-            pixel.posX = targetX;
-            pixel.posY = targetY;
-            this.pixelMap.delete(key);
-            this.pixelMap.set(targetKey, object);
-            this.activePixels.add(object);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    updatePixelMap(x, y, targetX, targetY) {
-        const key = x + ',' + y;
-        const newKey = targetX + "," + targetY;
-        if (this.pixelMap.has(key)) {
-            const pixel = this.pixelMap.get(key);
-            this.pixelMap.delete(key);
-            this.pixelMap.set(newKey, pixel);
-            this.activePixels.add(pixel);
-            //TODO: activePixels need to be de-activated at some point.
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-
-    // Remove all references to a pixel object.
-    deletePixel(pixel) {
-        const key = pixel.x + ',' + pixel.y;
-        if (this.pixelMap.has(key) === true) {
-            this.pixelMap.delete(key);
-            this.activePixels.delete(pixel);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // Create a new pixel objects.
-    spawnPixels() {
-        // Create pixels when mouse click is held.
+    /**
+     * Update entities, physics, and AI.
+     * 
+     * @param {DOMHighResTimeStamp} timestamp 
+     */
+    update = (timestamp) => {
         if (this.mouse.clickHeld == true) {
             const granule = new matter.sand(this.mouse.x, this.mouse.y, 0, 0);
-            this.addPixel(granule);
+            this.entities.placeEntity(granule);
         }
-
-        // Spawn pixels from weather.
-        this.activeWeathers.forEach(currWeather => {
-                const newPixels = currWeather.spawnMaterials();
-                newPixels.forEach(newPixel => {
-                    this.addPixel(newPixel);
-                });
-        });
+        const timeDelta = timestamp - this.lastTimestamp;
+        this.entities.update(timeDelta);
+        //TODO: this.ai.update(timeDelta);
     }
 
-    checkPath(x, y, targetX, target) {
-
-    }
-
-    applyPhysics(pixel, timestep) {
-        const x1 = pixel.x;
-        const y1 = pixel.y;
-        pixel.applyPhysics(timestep);
-        this.updatePixelMap(x1, y1, pixel.x, pixel.y);
-        if (pixel.y > 999) {
-            this.deletePixel(pixel);
-        }
-    }
-
-    updateFrame(currentTime) {
+    /**
+     * Clear the canvas, and draw the new frame.
+     * 
+     * @param {DOMHighResTimeStamp} timestamp 
+     */
+    drawFrame = (timestamp) => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.spawnPixels();
-        const timestep = (currentTime - this.previousTime) / 1000;
-        this.activePixels.forEach(pixel => this.applyPhysics(pixel, timestep));
+        this.draw.drawEntities(this.entities.list);
+        this.frames += 1;
+        this.stats.update(timestamp, this.frames, this.entities.list.size);
         this.stats.displayFPS(10, 25, 25);
-        this.draw.drawPixelMap(this.pixelMap);
+        this.lastTimestamp = timestamp;
+        this.nextFrameTime = timestamp + this.timestep;
     }
 
-    main(currentTime) {
-        if (this.frames > 5000) {
-            return;
+    main = (timestamp) => {
+        if (timestamp >= this.nextFrameTime) {
+            if (this.controls.paused === false) {
+                // Only run calculations when unpaused.
+                this.update(timestamp);
+            }
+            // Draw new frames based on game framerateLimit.
+            this.drawFrame(timestamp);
         }
-        this.stats.update(currentTime, this.frames, this.pixelMap.size);
-        this.updateFrame(currentTime);
-        this.previousTime = currentTime;
-        this.frames += 1;
+        // Always request the next animation frame, even if a new frame wasn't drawn.
+        // This keeps the client framerate smooth, and avoids the need for a sleep function.
         window.requestAnimationFrame(this.main);
     }
-
 }
 
-// Start the game.
-const gameInstance = new game();
-
-// Start raining.
-const raintstorm = gameInstance.enableWeather(weather.rainstorm);
+// Start the game on the "game" canvas.
+const canvas = document.getElementById("game");
+const instance = new game(canvas);

@@ -1,34 +1,43 @@
+import {entity} from './entity.js';
 import {util} from './util.js';
 import * as matter from './matter.js';
 
-export class weather {
+export class weather extends entity {
     type = "weather";
     material;
-    minX;
-    maxX;
-    minY;
-    maxY;
-    minXV;
-    maxXV;
-    minYV;
-    maxYV;
-    minSpawn;
-    maxSpawn;
+    minSpawnX;
+    maxSpawnX;
+    minSpawnY;
+    maxSpawnY;
+    minSpawnXV;
+    maxSpawnXV;
+    minSpawnYV;
+    maxSpawnYV;
+    minSpawnCount;
+    maxSpawnCount;
     randNum;
 
+    /**
+     * 
+     * @param {util} util 
+     */
     constructor(util) {
         this.randNum = util.genRandNum;
     }
 
+    /**
+     * 
+     * @returns {Array} A list of objects, created based on given spawn parameters.
+     */
     spawnMaterials() {
         const newObjects = [];
-        const spawnCount = this.randNum(this.minSpawn, this.maxSpawn);
+        const spawnCount = this.randNum(this.minSpawnCount, this.maxSpawnCount);
         for (let i = 1; i <= spawnCount; i++) {
             const newObject = new this.material(
-                this.randNum(this.minX, this.maxX),
-                this.randNum(this.minY, this.maxY),
-                this.randNum(this.minXV, this.maxXV),
-                this.randNum(this.minYV, this.maxYV)
+                this.randNum(this.minSpawnX, this.maxSpawnX),
+                this.randNum(this.minSpawnY, this.maxSpawnY),
+                this.randNum(this.minSpawnXV, this.maxSpawnXV),
+                this.randNum(this.minSpawnYV, this.maxSpawnYV)
             );
             newObjects.push(newObject);
         }
@@ -39,14 +48,14 @@ export class weather {
 export class rainstorm extends weather {
     name = "rainstorm";
     material = matter.water;
-    minX = -150;
-    maxX = 999;
-    minY = 0;
-    maxY = 0;
-    minXV = 15;
-    maxXV = 50;
-    minYV = 150;
-    maxYV = 300;
+    minSpawnX = -150;
+    maxSpawnX = 999;
+    minSpawnY = 0;
+    maxSpawnY = 0;
+    minSpawnXV = 15;
+    maxSpawnXV = 50;
+    minSpawnYV = 150;
+    maxSpawnYV = 300;
     minSpawn = 15;
     maxSpawn = 30;
 }

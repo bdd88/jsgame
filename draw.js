@@ -19,7 +19,6 @@ export class draw {
 
     drawPixel(x, y, color) {
         this.drawRectangle(x, y, 1, 1, color);
-        return true;
     }
 
     drawLine(xStart, yStart, xStop, yStop, color) {
@@ -28,17 +27,24 @@ export class draw {
         this.ctx.lineTo(xStop, yStop);
         this.ctx.strokeStyle = color;
         this.ctx.stroke();
-        return true;
     }
 
     drawRectangle(x, y, width, height, color) {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
-        return true;
     }
 
-    drawPixelMap(pixelMap) {
-        pixelMap.forEach((pixel) => this.drawPixel(pixel.x, pixel.y, pixel.color));
-        return;
+    drawText(x, y, color, size, font, string) {
+        this.ctx.fillStyle = color;
+        this.ctx.font = size + "px " + font;
+        this.ctx.fillText(string, x, y);
     }
+
+    drawEntities(entities) {
+        //TODO: Draw entities with shapes, instead of just individual pixels.
+        entities.forEach(
+            (entity) => this.drawPixel(entity.x, entity.y, entity.color)
+        );
+    }
+
 }
