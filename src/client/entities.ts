@@ -1,21 +1,22 @@
 import { entity } from "./entity";
+import { util } from "./util";
 
 /**
  * Collection of entities, and a location map of their positions on the x/y grid.
  */
 export class entities {
-    /** All entities that exist. */
-    list = new Set();
-    /** Position of entities on an integer x/y grid. */
-    locations = new Map();
-    /** Entities that should have physics applied every update. */
-    active = new Set();
-    /** Entities that can have simulation skipped some or all of the time. */
-    inactive = new Set();
-    util;
+    list: Set<entity>;
+    active: Set<entity>;
+    inactive: Set<entity>;
+    locations: Map<string,entity>;
+    util: util;
 
-    constructor(util) {
+    constructor(util: util) {
         this.util = util;
+        this.list = new Set();
+        this.locations = new Map();
+        this.active = new Set();
+        this.inactive = new Set();
     }
 
     /**
@@ -24,7 +25,7 @@ export class entities {
      * @param {entity} entity Entity to place.
      * @returns {boolean} False if the entity was not found.
      */
-    placeEntity(entity) {
+    placeEntity(entity: entity) {
         const location = entity.x + ',' + entity.y;
         if ( this.locations.has(location) ) { return false; }
         this.list.add(entity);
@@ -42,17 +43,18 @@ export class entities {
      * @param {integer} targetY New vertical position.
      * @returns {boolean} False if entity not found.
      */
-    moveEntity(x, y, targetX, targetY) {
+    moveEntity(x: number, y: number, targetX: number, targetY: number) {
         const location = x + ',' + y;
         const newLocation = targetX + ',' + targetY;
         if ( !this.locations.has(location) ) { return false; }
 
-        const entity = this.locations.get(location);
-        entity.posX = targetX;
-        entity.posY = targetY;
+        if (this.locations.get(location) === undefined) { return false; }
+        const entityInstance = this.locations.get(location) as entity;
+        entityInstance.x = targetX;
+        entityInstance.x = targetY;
         this.locations.delete(location);
-        this.locations.set(newLocation, entity);
-        this.active.add(entity);
+        this.locations.set(newLocation, entityInstance);
+        this.active.add(entityInstance);
         return true;
     }
 
@@ -62,7 +64,7 @@ export class entities {
      * @param {entity} entity Entity to delete.
      * @returns {boolean} False if the entity was not found, or was not fully removed.
      */
-    removeEntity(entity) {
+    removeEntity(entity: entity) {
         const location = entity.x + ',' + entity.y;
         if ( !this.locations.has(location) ) { return false; }
         if ( !this.locations.delete(location) ) { return false;} 
@@ -79,7 +81,7 @@ export class entities {
      * @param {integer} timeDelta Milliseconds since the last update.
      * @returns {boolean} False if entity not found.
      */
-    updateEntity(entity, timeDelta) {
+    updateEntity(entity: entity, timeDelta: number) {
         const x1 = entity.x;
         const y1 = entity.y;
         entity.applyPhysics(timeDelta);
@@ -96,7 +98,7 @@ export class entities {
      * 
      * @param {integer} timeDelta Milliseconds since the last update.
      */
-    update(timeDelta) {
+    update(timeDelta: number) {
         this.active.forEach(
             entity => this.updateEntity(entity, timeDelta)
         );
