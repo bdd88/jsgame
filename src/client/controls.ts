@@ -1,20 +1,15 @@
-import { mouse } from "./mouse.js";
-import { keyboard } from "./keyboard.js";
-import { entities } from "./entities.js";
-import { sand } from './matter/granule/sand.js';
+import { mouse } from "./mouse";
+import { keyboard } from "./keyboard";
+import { entities } from "./entities";
+import { sand } from './matter/granule/sand';
 
 export class controls {
-    mouse;
-    keyboard;
-    paused = false;
+    mouse: mouse;
+    keyboard: keyboard;
+    entities: entities;
+    paused: boolean = false;
 
-    /**
-     * 
-     * @param {mouse} mouse 
-     * @param {keyboard} keyboard 
-     * @param {entities} entities
-     */
-    constructor (mouse, keyboard, entities) {
+    constructor (mouse: mouse, keyboard: keyboard, entities: entities) {
         this.mouse = mouse;
         this.keyboard = keyboard;
         this.entities = entities
@@ -27,8 +22,8 @@ export class controls {
         document.addEventListener('keyup', (e) => this.keyboard.release(e));
 
         this.keyboard.callbackOnPress.set('Escape', this.togglePause);
-        this.mouse.addButtonPressCallback('Left', this.mouseInteractions);
-        this.mouse.addButtonPressCallback('Right', this.togglePause);
+        this.mouse.addButtonPressCallback('Left', this.mouseInteractions, []);
+        this.mouse.addButtonPressCallback('Right', this.togglePause, []);
     }
 
     togglePause = () => {

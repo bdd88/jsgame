@@ -1,18 +1,19 @@
 export class stats {
 
-    ctx;
-    fpsRecent = 0;
-    fpsAvg = 0;
-    frameTimes = [];
-    frames = 0;
-    time = 0;
-    pixels = 0;
+    ctx: CanvasRenderingContext2D;
+    fpsRecent: number = 0;
+    fpsAvg: number = 0;
+    frameTimes: Array<any> = [];
+    frames: number = 0;
+    time: number = 0;
+    pixels: number = 0;
 
-    constructor(context) {
+    constructor(context: CanvasRenderingContext2D) {
         this.ctx = context;
     }
 
-    update(currentTime, frames, pixels) {
+    /** Calculate stats such as FPS and latency/lag */
+    update(currentTime: number, frames: number, pixels: number) {
         this.time = currentTime;
         this.frames = frames;
         this.pixels = pixels;
@@ -26,7 +27,8 @@ export class stats {
         // this.fpsAvg = Math.floor(frames / (currentTime / 1000));
     }
 
-    displayFPS(x, y, size) {
+    /** Display calculated stats */
+    displayFPS(x: number, y: number, size: number) {
         const frames = "Frames: " + this.frames;
         const time = "Time: " + Math.floor(this.time / 1000);
         const fpsRecent = "FPS: " + this.fpsRecent;
