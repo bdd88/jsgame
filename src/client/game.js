@@ -1,14 +1,11 @@
-import {physicsObject} from './physics.js';
-import {mouse} from './mouse.js';
-import {keyboard} from './keyboard.js';
 import {draw} from './draw.js';
 import {stats} from './stats.js';
 import {util} from './util.js';
-import * as weather from './weather.js';
-import * as matter from './matter.js';
 import {pauseButton} from './menu.js';
 import {entities} from './entities.js';
 import {controls} from './controls.js';
+import {mouse} from './mouse.js';
+import {keyboard} from './keyboard.js';
 
 class game {
     width = 1000;
@@ -40,9 +37,8 @@ class game {
         this.util = new util();
         this.mouse = new mouse(this.canvas);
         this.keyboard = new keyboard();
-        this.controls = new controls(this.mouse, this.keyboard);
         this.entities = new entities(this.util);
-        //TODO: this.pauseButtom = new pauseButton(this.mouse, this.draw, this.togglePause, []);
+        this.controls = new controls(this.mouse, this.keyboard, this.entities);
 
         // Start the main animation loop.
         this.timestep = 1000 / this.framerateLimit;
@@ -56,10 +52,6 @@ class game {
      * @param {DOMHighResTimeStamp} timestamp 
      */
     update = (timestamp) => {
-        if (this.mouse.clickHeld == true) {
-            const granule = new matter.sand(this.mouse.x, this.mouse.y, 0, 0);
-            this.entities.placeEntity(granule);
-        }
         const timeDelta = timestamp - this.lastTimestamp;
         this.entities.update(timeDelta);
         //TODO: this.ai.update(timeDelta);
@@ -75,9 +67,19 @@ class game {
         this.draw.drawEntities(this.entities.list);
         this.frames += 1;
         this.stats.update(timestamp, this.frames, this.entities.list.size);
+        this.menus();
         this.stats.displayFPS(10, 25, 25);
         this.lastTimestamp = timestamp;
         this.nextFrameTime = timestamp + this.timestep;
+    }
+
+    //TODO: Remove
+    menus = () => {
+        this.pauseButtom = new pauseButton(this.mouse, this.draw, this.togglePause, [], 500, 100);
+        this.pauseButtom.display();
+        if (this.pauseButtom.checkIfClicked() === true) {
+            this.controls.togglePause();
+        }
     }
 
     main = (timestamp) => {

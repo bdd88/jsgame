@@ -14,20 +14,34 @@ export class button {
     string;
     callback;
     callbackArgs;
+    mouse;
+    draw;
 
-    constructor(mouse, draw, callback, callbackArgs) {
+    /**
+     * 
+     * @param {mouse} mouse 
+     * @param {draw} draw 
+     * @param {Function} callback 
+     * @param {Array} callbackArgs 
+     * @param {integer} x 
+     * @param {integer} y 
+     */
+    constructor(mouse, draw, callback, callbackArgs, x, y) {
         this.mouse = mouse;
         this.draw = draw;
         this.callback = callback;
         this.callbackArgs = callbackArgs;
+        this.x = x;
+        this.y = y;
     }
 
     display() {
-        this.draw.drawRectangle(this.x, this.y, this.width, this.height, this.color);
+        this.draw.drawRectangleFilled(this.x, this.y, this.width, this.height, "red");
+        this.draw.drawRectangleHollow(this.x, this.y, this.width, this.height, "blue");
         this.draw.drawText(this.x, this.y, this.color, this.fontSize, this.fontType, this.string);
     }
 
-    checkIfClicked () {
+    checkIfClicked() {
         if (
             this.mouse.x1 >= this.x &&
             this.mouse.x1 <= (this.x + this.width) &&
@@ -38,6 +52,7 @@ export class button {
             this.mouse.y2 >= this.y &&
             this.mouse.y2 <= (this.y + this.height)
         ) {
+            console.log("Clicked");
             this.mouse.x1 = null;
             this.mouse.y1 = null;
             this.mouse.x2 = null;

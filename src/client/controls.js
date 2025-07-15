@@ -1,5 +1,7 @@
 import { mouse } from "./mouse.js";
 import { keyboard } from "./keyboard.js";
+import { entities } from "./entities.js";
+import { sand } from './matter/granule/sand.js';
 
 export class controls {
     mouse;
@@ -10,31 +12,34 @@ export class controls {
      * 
      * @param {mouse} mouse 
      * @param {keyboard} keyboard 
+     * @param {entities} entities
      */
-    constructor (mouse, keyboard) {
-        // Mouse
+    constructor (mouse, keyboard, entities) {
         this.mouse = mouse;
+        this.keyboard = keyboard;
+        this.entities = entities
+
         document.addEventListener('mousedown', (e) => this.mouse.press(e));
         document.addEventListener('mouseup', (e) => this.mouse.release(e));
         document.addEventListener('mousemove', (e) => this.mouse.move(e));
         document.addEventListener("contextmenu", (e) => this.mouse.menu(e));
-        //TODO: this.mouse.callbackOnHeld.set(this.mouseInteractions);
-
-        // Keyboard
-        this.keyboard = keyboard;
         document.addEventListener('keydown', (e) => this.keyboard.press(e));
-        document.addEventListener('keydown', (e) => this.keyboard.release(e));
+        document.addEventListener('keyup', (e) => this.keyboard.release(e));
+
         this.keyboard.callbackOnPress.set('Escape', this.togglePause);
+        this.mouse.addButtonPressCallback('Left', this.mouseInteractions);
+        this.mouse.addButtonPressCallback('Right', this.togglePause);
     }
 
     togglePause = () => {
-        return this.paused = !this.paused;
+        this.paused = !this.paused;
+        console.log("Paused: " + this.paused);
+        return this.paused;
     }
 
     mouseInteractions = () => {
-        // Create sand when mouse click is held.
-        if (this.mouse.clickHeld == true) {
-
-        }
+        console.log('spawning sand');
+        const newEntity = new sand(this.mouse.x, this.mouse.y, 0, 0);
+        this.entities.placeEntity(newEntity);
     }
 }
