@@ -2,20 +2,24 @@ import {draw} from './draw';
 import {mouse} from './mouse';
 
 export class button {
-    type = "button";
-    name;
-    x;
-    y;
-    width;
-    height;
-    color;
-    fontSize;
-    fontType;
-    string;
-    callback;
-    callbackArgs;
-    mouse;
-    draw;
+    type: string = "button";
+    name: string = "";
+    x: number;
+    y: number;
+    width: number = 0;
+    height: number = 0;
+    color: string = "";
+    fontSize: number = 0;
+    fontType: string = "";
+    string: string = "";
+    callback: Function;
+    callbackArgs: Array<any>;
+    mouse: mouse;
+    draw: draw;
+    leftSide: number;
+    topSide: number;
+    rightSide: number;
+    bottomSide: number;
 
     /**
      * 
@@ -26,13 +30,17 @@ export class button {
      * @param {integer} x 
      * @param {integer} y 
      */
-    constructor(mouse, draw, callback, callbackArgs, x, y) {
+    constructor(mouse: mouse, draw: draw, callback: Function, callbackArgs: Array<any>, x: number, y: number) {
         this.mouse = mouse;
         this.draw = draw;
         this.callback = callback;
         this.callbackArgs = callbackArgs;
         this.x = x;
         this.y = y;
+        this.leftSide = this.x;
+        this.topSide = this.y;
+        this.rightSide = this.x + this.width;
+        this.bottomSide = this.y + this.height;
     }
 
     display() {
@@ -42,21 +50,18 @@ export class button {
     }
 
     checkIfClicked() {
+        const leftClick = this.mouse.getButtonByName('Left');
         if (
-            this.mouse.x1 >= this.x &&
-            this.mouse.x1 <= (this.x + this.width) &&
-            this.mouse.y1 >= this.y &&
-            this.mouse.y1 <= (this.y + this.height) &&
-            this.mouse.x2 >= this.x &&
-            this.mouse.x2 <= (this.x + this.width) &&
-            this.mouse.y2 >= this.y &&
-            this.mouse.y2 <= (this.y + this.height)
+            leftClick.pressX >= this.leftSide &&
+            leftClick.pressX <= this.rightSide &&
+            leftClick.pressY >= this.topSide &&
+            leftClick.pressY <= this.bottomSide &&
+            leftClick.releaseX >= this.leftSide &&
+            leftClick.releaseX <= this.rightSide &&
+            leftClick.releaseY >= this.topSide &&
+            leftClick.releaseY <= this.bottomSide
         ) {
             console.log("Clicked");
-            this.mouse.x1 = null;
-            this.mouse.y1 = null;
-            this.mouse.x2 = null;
-            this.mouse.y2 = null;
             return true;
         } else {
             return false;
@@ -65,17 +70,18 @@ export class button {
 }
 
 export class menu {
-    x = null;
-    y = null;
-    name = "menu";
-    buttons = [];
-    draw = null;
+    x: number = 0;
+    y: number = 0;
+    name: string = "menu";
+    buttons: Array<button>;
+    draw: draw;
 
-    constructor(draw) {
+    constructor(draw: draw) {
         this.draw = draw;
+        this.buttons = [];
     }
 
-    addButton(button) {
+    addButton(button: button) {
         this.buttons.push(button);
     }
 
