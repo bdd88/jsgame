@@ -1,7 +1,7 @@
-import { mouse } from "./mouse.js";
-import { keyboard } from "./keyboard.js";
-import { entities } from "./entities.js";
-import { sand } from './matter/granule/sand.js';
+import { mouse } from "./mouse";
+import { keyboard } from "./keyboard";
+import { entities } from "./entities";
+import { sand } from './matter/granule/sand';
 
 export class controls {
     mouse;
@@ -10,8 +10,8 @@ export class controls {
 
     /**
      * 
-     * @param {mouse} mouse 
-     * @param {keyboard} keyboard 
+     * @param {mouse} mouse
+     * @param {keyboard} keyboard
      * @param {entities} entities
      */
     constructor (mouse, keyboard, entities) {

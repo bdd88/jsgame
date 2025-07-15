@@ -1,4 +1,4 @@
-import { physicsObject } from '../physics.js';
+import { physicsObject } from '../physics';
 
 export class matter extends physicsObject {
     name = null;

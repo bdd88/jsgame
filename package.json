@@ -1,0 +1,30 @@
+{
+  "name": "jsgame",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/bdd88/jsgame#readme",
+  "bugs": {
+    "url": "https://github.com/bdd88/jsgame/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bdd88/jsgame.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.ts",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.1",
+    "babel-loader": "^10.0.0",
+    "typescript": "^5.8.3",
+    "webpack": "^5.100.1",
+    "webpack-cli": "^6.0.1"
+  }
+}

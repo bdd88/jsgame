@@ -1,4 +1,4 @@
-import { entity } from "./entity.js";
+import { entity } from "./entity";
 
 /**
  * Collection of entities, and a location map of their positions on the x/y grid.

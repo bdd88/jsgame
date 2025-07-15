@@ -1,4 +1,4 @@
-import { physicsObject } from "./physics.js";
+import { physicsObject } from "./physics";
 
 /**
  * An in-game object that has physics simulations applied to it.
