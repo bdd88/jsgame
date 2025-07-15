@@ -16,34 +16,16 @@ import { entity } from "./entity";
 export class draw {
     ctx: CanvasRenderingContext2D;
 
-    /**
-     * 
-     * @param {CanvasRenderingContext2D} context 
-     */
     constructor(context: CanvasRenderingContext2D) {
         this.ctx = context;
     }
 
-    /**
-     * Draw a single pixel.
-     * 
-     * @param {integer} x 
-     * @param {integer} y 
-     * @param {string} color 
-     */
+    /** Draw a single pixel. */
     drawPixel(x: number, y: number, color: string) {
         this.drawRectangleFilled(x, y, 1, 1, color);
     }
 
-    /**
-     * Draw a line segment.
-     * 
-     * @param {integer} x1 
-     * @param {integer} y1 
-     * @param {integer} x2 
-     * @param {integer} y2 
-     * @param {string} color 
-     */
+    /** Draw a line segment. */
     drawLine(x1: number, y1: number, x2: number, y2: number, color: string) {
         this.ctx.beginPath();
         this.ctx.moveTo(x1, y1);
@@ -52,29 +34,13 @@ export class draw {
         this.ctx.stroke();
     }
 
-    /**
-     * Draw a filled rectangle.
-     * 
-     * @param {integer} x 
-     * @param {integer} y 
-     * @param {integer} width 
-     * @param {integer} height 
-     * @param {string} color 
-     */
+    /** Draw a filled rectangle. */
     drawRectangleFilled(x: number, y: number, width: number, height: number, color: string) {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
     }
 
-    /**
-     * Draw a hollow rectangle.
-     * 
-     * @param {integer} x 
-     * @param {integer} y 
-     * @param {integer} width 
-     * @param {integer} height 
-     * @param {string} color 
-     */
+    /** Draw a hollow rectangle. */
     drawRectangleHollow(x: number, y: number, width: number, height: number, color: string) {
         this.ctx.beginPath();
         this.ctx.strokeStyle = color;
@@ -84,26 +50,14 @@ export class draw {
         this.ctx.stroke();
     }
 
-    /**
-     * Draw text.
-     * 
-     * @param {integer} x 
-     * @param {integer} y 
-     * @param {string} color 
-     * @param {integer} size 
-     * @param {string} font 
-     * @param {string} text
-     */
+    /** Draw text. */
     drawText(x: number, y: number, color: string, size: number, font: string, text: string) {
         this.ctx.fillStyle = color;
         this.ctx.font = size + "px " + font;
         this.ctx.fillText(text, x, y);
     }
 
-    /**
-     * Draw each entity in the entities list.
-     * @param {Set} entities 
-     */
+    /** Draw each entity in the entities list. */
     drawEntities(entities: Set<entity>) {
         //TODO: Draw entities with shapes, instead of just individual pixels.
         entities.forEach(

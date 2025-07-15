@@ -6,9 +6,7 @@ So a realistic in game speed would be 98.1 pixels per second squared.
 This makes a 1.8m (5'11") tall character about 18 pixels tall in game.
 */
 
-/**
- * An object with simulated physics based on real-world physics calculations.
- */
+/** An object with simulated physics based on real-world physics calculations. */
 export class physicsObject {
     xv;
     yv;
@@ -16,13 +14,6 @@ export class physicsObject {
     y;
     gravity = 98.1;
 
-    /**
-     * 
-     * @param {integer} x Horizontal position.
-     * @param {integer} y Veritical position.
-     * @param {integer} xv Horizontal velocity.
-     * @param {integer} yv Vertical velocity.
-     */
     constructor(x: number, y: number, xv: number, yv: number) {
         this.x = x;
         this.y = y;
@@ -30,30 +21,19 @@ export class physicsObject {
         this.yv = yv;
     }
 
-    /**
-     * Add a new vector to the current one.
-     * @param {integer} xv Horizontal velocity.
-     * @param {integer} yv Vertical velocity.
-     */
+    /** Add a new vector to the current one. */
     addVelocity(xv: number, yv: number) {
         this.xv = this.xv + xv;
         this.yv = this.yv + yv;
     }
 
-    /**
-     * Multiply a new vector with the current one.
-     * @param {integer} xv Horizontal velocity.
-     * @param {integer} yv Vertical velocity.
-     */
+    /** Multiply a new vector with the current one. */
     multVelocity(xv: number, yv: number) {
         this.xv = this.xv * xv;
         this.yv = this.yv * yv;
     }
 
-    /**
-     * Move an object based on position, velocity, time, and gravity.
-     * @param {integer} timeDelta Time in MS since the last update.
-     */
+    /** Move an object based on position, velocity, time, and gravity. */
     applyPhysics(timeDelta: number) {
         /**
          * TODO:
@@ -68,8 +48,8 @@ export class physicsObject {
         this.y = this.y + (this.yv * timestep);
     }
 
+    /** Calculate the path across the 2d grid without floating point math. */
     calcLine (x1: number, y1: number, x2: number, y2: number) {
-
         // Set preference values based on distance to destination.
         const xPreferenceValue = Math.abs(x2 - x1);
         const yPreferenceValue = Math.abs(y2 - y1);
@@ -112,7 +92,3 @@ export class physicsObject {
         return;
     }
 }
-
-// const test = new physicsObject(0, 0, 0, 0);
-// let path = test.calcLine(0,0,10,15);
-// console.log(path);

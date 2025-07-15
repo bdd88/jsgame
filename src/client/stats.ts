@@ -12,6 +12,7 @@ export class stats {
         this.ctx = context;
     }
 
+    /** Calculate stats such as FPS and latency/lag */
     update(currentTime: number, frames: number, pixels: number) {
         this.time = currentTime;
         this.frames = frames;
@@ -26,6 +27,7 @@ export class stats {
         // this.fpsAvg = Math.floor(frames / (currentTime / 1000));
     }
 
+    /** Display calculated stats */
     displayFPS(x: number, y: number, size: number) {
         const frames = "Frames: " + this.frames;
         const time = "Time: " + Math.floor(this.time / 1000);

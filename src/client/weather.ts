@@ -17,19 +17,12 @@ export class weather extends entity {
     maxSpawnCount: number = 0;
     randNum: util['genRandNum'];
 
-    /**
-     * 
-     * @param {util} util 
-     */
     constructor(util: util, x: number, y: number, xv: number, yv: number) {
         super(x, y, xv, yv);
         this.randNum = util.genRandNum;
     }
 
-    /**
-     * 
-     * @returns {Array} A list of objects, created based on given spawn parameters.
-     */
+    /** Create a list of new objects to spawn, based on weather parameters. */
     spawnMaterials() {
         const newObjects = [];
         const spawnCount = this.randNum(this.minSpawnCount, this.maxSpawnCount);

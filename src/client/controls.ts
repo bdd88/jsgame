@@ -9,12 +9,6 @@ export class controls {
     entities: entities;
     paused: boolean = false;
 
-    /**
-     * 
-     * @param {mouse} mouse
-     * @param {keyboard} keyboard
-     * @param {entities} entities
-     */
     constructor (mouse: mouse, keyboard: keyboard, entities: entities) {
         this.mouse = mouse;
         this.keyboard = keyboard;

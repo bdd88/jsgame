@@ -26,9 +26,6 @@ class game {
   controls: controls;
   lastTimestamp: number = 0;
 
-  /**
-   * @param {HTMLElement} canvas
-   */
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     const context = this.canvas.getContext("2d");
@@ -48,22 +45,14 @@ class game {
     window.requestAnimationFrame(this.main);
   }
 
-  /**
-   * Update entities, physics, and AI.
-   *
-   * @param {DOMHighResTimeStamp} timestamp
-   */
+  /** Update entities, physics, and AI. */
   update = (timestamp: DOMHighResTimeStamp) => {
     const timeDelta = timestamp - this.lastTimestamp;
     this.entities.update(timeDelta);
     //TODO: this.ai.update(timeDelta);
   };
 
-  /**
-   * Clear the canvas, and draw the new frame.
-   *
-   * @param {DOMHighResTimeStamp} timestamp
-   */
+  /** Clear the canvas, and draw the new frame. */
   drawFrame = (timestamp: DOMHighResTimeStamp) => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.draw.drawEntities(this.entities.list);
@@ -91,6 +80,7 @@ class game {
   //   }
   // };
 
+  /** Main logic loop. */
   main = (timestamp: DOMHighResTimeStamp) => {
     if (timestamp >= this.nextFrameTime) {
       if (this.controls.paused === false) {

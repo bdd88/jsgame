@@ -21,15 +21,6 @@ export class button {
     rightSide: number;
     bottomSide: number;
 
-    /**
-     * 
-     * @param {mouse} mouse 
-     * @param {draw} draw 
-     * @param {Function} callback 
-     * @param {Array} callbackArgs 
-     * @param {integer} x 
-     * @param {integer} y 
-     */
     constructor(mouse: mouse, draw: draw, callback: Function, callbackArgs: Array<any>, x: number, y: number) {
         this.mouse = mouse;
         this.draw = draw;

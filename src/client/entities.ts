@@ -1,9 +1,7 @@
 import { entity } from "./entity";
 import { util } from "./util";
 
-/**
- * Collection of entities, and a location map of their positions on the x/y grid.
- */
+/** Collection of entities, and a location map of their positions on the x/y grid. */
 export class entities {
     list: Set<entity>;
     active: Set<entity>;
@@ -19,12 +17,7 @@ export class entities {
         this.inactive = new Set();
     }
 
-    /**
-     * Place a new entity object into the location map.
-     * 
-     * @param {entity} entity Entity to place.
-     * @returns {boolean} False if the entity was not found.
-     */
+    /** Place a new entity object into the location map. */
     placeEntity(entity: entity) {
         const location = entity.x + ',' + entity.y;
         if ( this.locations.has(location) ) { return false; }
@@ -34,15 +27,7 @@ export class entities {
         return true;
     }
 
-    /**
-     * Move an entity at a location to a new location.
-     * 
-     * @param {integer} x Current horizontal position.
-     * @param {integer} y Current veritical position.
-     * @param {integer} targetX New horizontal position.
-     * @param {integer} targetY New vertical position.
-     * @returns {boolean} False if entity not found.
-     */
+    /** Move an entity at a location to a new location. */
     moveEntity(x: number, y: number, targetX: number, targetY: number) {
         const location = x + ',' + y;
         const newLocation = targetX + ',' + targetY;
@@ -58,12 +43,7 @@ export class entities {
         return true;
     }
 
-    /**
-     * Remove an entity from the location map, and then delete it from the entity list.
-     * 
-     * @param {entity} entity Entity to delete.
-     * @returns {boolean} False if the entity was not found, or was not fully removed.
-     */
+    /** Remove an entity from the location map, and then delete it from the entity list. */
     removeEntity(entity: entity) {
         const location = entity.x + ',' + entity.y;
         if ( !this.locations.has(location) ) { return false; }
@@ -76,10 +56,6 @@ export class entities {
     /**
      * Apply physics to an entity and updates its' location.
      * The entity will be removed if it moves below the floor.
-     * 
-     * @param {entity} entity An in-game entity with physics simulations applied.
-     * @param {integer} timeDelta Milliseconds since the last update.
-     * @returns {boolean} False if entity not found.
      */
     updateEntity(entity: entity, timeDelta: number) {
         const x1 = entity.x;
@@ -93,11 +69,7 @@ export class entities {
         return true;
     }
 
-    /**
-     * Apply physics and update the locations of all active entities.
-     * 
-     * @param {integer} timeDelta Milliseconds since the last update.
-     */
+    /** Apply physics and update the locations of all active entities. */
     update(timeDelta: number) {
         this.active.forEach(
             entity => this.updateEntity(entity, timeDelta)
