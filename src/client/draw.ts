@@ -10,14 +10,17 @@
 //     downRight: [ 1,  1]
 // };
 
+import { entities } from "./entities";
+import { entity } from "./entity";
+
 export class draw {
-    ctx;
+    ctx: CanvasRenderingContext2D;
 
     /**
      * 
      * @param {CanvasRenderingContext2D} context 
      */
-    constructor(context) {
+    constructor(context: CanvasRenderingContext2D) {
         this.ctx = context;
     }
 
@@ -28,7 +31,7 @@ export class draw {
      * @param {integer} y 
      * @param {string} color 
      */
-    drawPixel(x, y, color) {
+    drawPixel(x: number, y: number, color: string) {
         this.drawRectangleFilled(x, y, 1, 1, color);
     }
 
@@ -41,7 +44,7 @@ export class draw {
      * @param {integer} y2 
      * @param {string} color 
      */
-    drawLine(x1, y1, x2, y2, color) {
+    drawLine(x1: number, y1: number, x2: number, y2: number, color: string) {
         this.ctx.beginPath();
         this.ctx.moveTo(x1, y1);
         this.ctx.lineTo(x2, y2);
@@ -58,7 +61,7 @@ export class draw {
      * @param {integer} height 
      * @param {string} color 
      */
-    drawRectangleFilled(x, y, width, height, color) {
+    drawRectangleFilled(x: number, y: number, width: number, height: number, color: string) {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
     }
@@ -72,7 +75,7 @@ export class draw {
      * @param {integer} height 
      * @param {string} color 
      */
-    drawRectangleHollow(x, y, width, height, color) {
+    drawRectangleHollow(x: number, y: number, width: number, height: number, color: string) {
         this.ctx.beginPath();
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = 1;
@@ -91,7 +94,7 @@ export class draw {
      * @param {string} font 
      * @param {string} text
      */
-    drawText(x, y, color, size, font, text) {
+    drawText(x: number, y: number, color: string, size: number, font: string, text: string) {
         this.ctx.fillStyle = color;
         this.ctx.font = size + "px " + font;
         this.ctx.fillText(text, x, y);
@@ -101,7 +104,7 @@ export class draw {
      * Draw each entity in the entities list.
      * @param {Set} entities 
      */
-    drawEntities(entities) {
+    drawEntities(entities: Set<entity>) {
         //TODO: Draw entities with shapes, instead of just individual pixels.
         entities.forEach(
             (entity) => this.drawPixel(entity.x, entity.y, entity.color)
