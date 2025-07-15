@@ -5,11 +5,11 @@ export class util {
      * @param {integer} max Maximum value to return
      * @returns {integer}
      */
-    genRandNum(min, max) {
+    genRandNum(min: number, max: number) {
         return Math.floor(Math.random() * (max - min + 1) ) + min;
     }
 
-    sleep(ms) {
+    sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
