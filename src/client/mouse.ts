@@ -1,17 +1,20 @@
+import { button } from "./gui";
+import { mouseButton } from "./mouseButton";
+
 export class mouse {
-    x = 0;
-    y = 0;
-    canvas;
-    button;
-    buttonNameToId;
-    buttonIdToName;
-    currentlyPressed;
+    x: number = 0;
+    y: number = 0;
+    canvas: HTMLElement;
+    buttonNameToId: Map<string,number> = new Map();
+    buttonIdToName: Map<number,string> = new Map();
+    buttonMap: Map<number,mouseButton> = new Map();
+    currentlyPressed: number = 0;
 
     /**
      * 
      * @param {HTMLElement} canvas 
      */
-    constructor(canvas) {
+    constructor(canvas: HTMLElement) {
         this.canvas = canvas;
         this.resetButtonMapping();
         this.resetButtonObjects();
@@ -39,44 +42,36 @@ export class mouse {
     resetButtonObjects() {
         this.buttonMap = new Map();
         this.buttonNameToId.forEach((id, name) => {
-            //console.log("ID: %i, Name: %s", id, name);
-            this.buttonMap.set(id, {
-                name: name,
-                pressed: null,
-                pressX: null,
-                pressY: null,
-                pressTime: null,
-                pressCallback: null,
-                pressCallbackArgs: null,
-                releaseX: null,
-                release: null,
-                releaseTime: null,
-                releaseCallback: null
-            });
+            this.buttonMap.set(id, new mouseButton());
         });
 
+    }
+
+    getButtonByName(buttonName: string) {
+        const buttonId = this.buttonNameToId.get(buttonName);
+        if (buttonId === undefined) { throw new Error("Button ID is not defined."); }
+        return this.getButtonById(buttonId)as mouseButton;
+    }
+
+    getButtonById(buttonId: number) {
+        if (!this.buttonMap.has(buttonId)) { throw new Error("Button object does not exist."); }
+        return this.buttonMap.get(buttonId) as mouseButton;
     }
 
     /**
      * Track button presses on the mouse.
      * @param {MouseEvent} e 
      */
-    press(e) {
-        const buttonId = e.button;
-        //console.log('%s was pressed.', this.buttonIdToName.get(buttonId));
-        this.buttonMap.get(buttonId).pressTime = performance.now();
-        this.buttonMap.get(buttonId).pressed = true;
-        this.buttonMap.get(buttonId).pressX = this.x;
-        this.buttonMap.get(buttonId).pressY = this.y;
+    press(e: MouseEvent) {
+        const buttonObject = this.getButtonById(e.button)
+        buttonObject.pressTime = performance.now();
+        buttonObject.pressed = true;
+        buttonObject.pressX = this.x;
+        buttonObject.pressY = this.y;
         this.currentlyPressed = e.buttons;
-        //console.log('Currently pressed: %i', this.currentlyPressed);
-        //console.log(this.buttonMap);
-        if (this.buttonMap.get(buttonId).pressCallback !== null) {
-            //console.log('Executing callback: %s(%s)', this.buttonMap.get(buttonId).pressCallback, this.buttonMap.get(buttonId).pressCallbackArgs);
-            const args = this.buttonMap.get(buttonId).pressCallbackArgs;
-            this.buttonMap.get(buttonId).pressCallback(args);
-        } else {
-            //console.log('No callback for pressing %s', this.buttonIdToName.get(buttonId));
+        if (buttonObject.pressCallback !== null) {
+            const args = buttonObject.pressCallbackArgs;
+            buttonObject.pressCallback(args);
         }
     }
 
@@ -84,21 +79,16 @@ export class mouse {
      * Track button releases on the mouse.
      * @param {MouseEvent} e 
      */
-    release(e) {
-        const buttonId = e.button;
-        //console.log('%s was released.', this.buttonIdToName.get(buttonId));
-        this.buttonMap.get(buttonId).releaseTime = performance.now();
-        this.buttonMap.get(buttonId).pressed = false;
-        this.buttonMap.get(buttonId).releaseX = this.x;
-        this.buttonMap.get(buttonId).releaseY = this.y;
+    release(e: MouseEvent) {
+        const buttonObject = this.getButtonById(e.button)
+        buttonObject.releaseTime = performance.now();
+        buttonObject.pressed = false;
+        buttonObject.releaseX = this.x;
+        buttonObject.releaseY = this.y;
         this.currentlyPressed = e.buttons;
-        //console.log('Currently pressed: %i', this.currentlyPressed);
-        if (this.buttonMap.get(buttonId).releaseCallback !== null) {
-            //console.log('Executing callback: %s(%s)', this.buttonMap.get(buttonId).pressCallback, this.buttonMap.get(buttonId).pressCallbackArgs);
-            const args = this.buttonMap.get(buttonId).releaseCallbackArgs;
-            this.buttonMap.get(buttonId).releaseCallback(args);
-        } else {
-            //console.log('No callback for releasing %s', this.buttonIdToName.get(buttonId));
+        if (buttonObject.releaseCallback !== null) {
+            const args = buttonObject.releaseCallbackArgs;
+            buttonObject.releaseCallback(args);
         }
     }
 
@@ -106,7 +96,7 @@ export class mouse {
      * Track the mouse position relative to the canvas.
      * @param {MouseEvent} e 
      */
-    move(e) {
+    move(e: MouseEvent) {
         this.x = e.clientX - this.canvas.getBoundingClientRect().left;
         this.y = e.clientY - this.canvas.getBoundingClientRect().top;
     }
@@ -115,7 +105,7 @@ export class mouse {
      * Prevent the right click menu from opening over the canvas.
      * @param {MouseEvent} e 
      */
-    menu(e) {
+    menu(e: MouseEvent) {
         if (
             this.x >= this.canvas.getBoundingClientRect().left &&
             this.x <= this.canvas.getBoundingClientRect().right &&
@@ -126,31 +116,22 @@ export class mouse {
         }
     }
 
-    addButtonPressCallback(buttonName, callback, args) {
-        const buttonId = this.buttonNameToId.get(buttonName);
-        if (this.buttonMap.has(buttonId)) {
-            this.buttonMap.get(buttonId).pressCallback = callback;
-            this.buttonMap.get(buttonId).pressCallbackArgs = args;
-            return true;
-        } else {
-            return false;
-        }
+    addButtonPressCallback(buttonName: string, callback: Function, args: Array<any>) {
+        const buttonObject = this.getButtonByName(buttonName);
+        buttonObject.pressCallback = callback;
+        buttonObject.pressCallbackArgs = args;
+        return true;
     }
 
-    addButtonReleaseCallback(buttonName, callback, args) {
-        const buttonId = this.buttonNameToId.get(buttonName);
-        if (this.buttonMap.has(buttonId)) {
-            this.buttonMap.get(buttonId).releaseCallback = callback;
-            this.buttonMap.get(buttonId).releaseCallbackArgs = args;
-            return true;
-        } else {
-            return false;
-        }
+    addButtonReleaseCallback(buttonName: string, callback: Function, args: Array<any>) {
+        const buttonObject = this.getButtonByName(buttonName);
+        buttonObject.releaseCallback = callback;
+        buttonObject.releaseCallbackArgs = args;
+        return true;
     }
 
-    buttonIsHeld(buttonName) {
-        if (!this.buttonNameToId.has(buttonName)) { return false; }
-        const buttonId = this.buttonNameToId.get(buttonName);
-        return this.buttonMap.get(buttonId).pressed;
+    buttonIsHeld(buttonName: string) {
+        const buttonObject = this.getButtonByName(buttonName);
+        return buttonObject.pressed;
     }
 }
