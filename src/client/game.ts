@@ -6,8 +6,6 @@ import { entities } from "./entities";
 import { controls } from "./controls";
 import { mouse } from "./mouse";
 import { keyboard } from "./keyboard";
-import { weather } from "./weather";
-import { matter } from "./matter/matter";
 
 class game {
   width: number = 1000;
@@ -16,11 +14,9 @@ class game {
 
   frames: number = 0;
   canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D | null;
+  ctx: CanvasRenderingContext2D;
   draw: draw;
   util: util;
-  matter: matter;
-  weather: weather;
   stats: stats;
   mouse: mouse;
   keyboard: keyboard;
@@ -28,13 +24,16 @@ class game {
   timestep: number;
   nextFrameTime: number;
   controls: controls;
+  lastTimestamp: number = 0;
 
   /**
    * @param {HTMLElement} canvas
    */
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.ctx = this.canvas.getContext("2d");
+    const context = this.canvas.getContext("2d");
+    if (context === null) { throw new Error("Unable to get context."); }
+    this.ctx = (context as CanvasRenderingContext2D);
     this.draw = new draw(this.ctx);
     this.stats = new stats(this.ctx);
     this.util = new util();
@@ -54,7 +53,7 @@ class game {
    *
    * @param {DOMHighResTimeStamp} timestamp
    */
-  update = (timestamp) => {
+  update = (timestamp: DOMHighResTimeStamp) => {
     const timeDelta = timestamp - this.lastTimestamp;
     this.entities.update(timeDelta);
     //TODO: this.ai.update(timeDelta);
@@ -65,34 +64,34 @@ class game {
    *
    * @param {DOMHighResTimeStamp} timestamp
    */
-  drawFrame = (timestamp) => {
+  drawFrame = (timestamp: DOMHighResTimeStamp) => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.draw.drawEntities(this.entities.list);
     this.frames += 1;
     this.stats.update(timestamp, this.frames, this.entities.list.size);
-    this.menus();
+    // this.menus();
     this.stats.displayFPS(10, 25, 25);
     this.lastTimestamp = timestamp;
     this.nextFrameTime = timestamp + this.timestep;
   };
 
-  //TODO: Remove
-  menus = () => {
-    this.pauseButtom = new pauseButton(
-      this.mouse,
-      this.draw,
-      this.togglePause,
-      [],
-      500,
-      100
-    );
-    this.pauseButtom.display();
-    if (this.pauseButtom.checkIfClicked() === true) {
-      this.controls.togglePause();
-    }
-  };
+  // //TODO: Remove
+  // menus = () => {
+  //   this.pauseButtom = new pauseButton(
+  //     this.mouse,
+  //     this.draw,
+  //     this.togglePause,
+  //     [],
+  //     500,
+  //     100
+  //   );
+  //   this.pauseButtom.display();
+  //   if (this.pauseButtom.checkIfClicked() === true) {
+  //     this.controls.togglePause();
+  //   }
+  // };
 
-  main = (timestamp) => {
+  main = (timestamp: DOMHighResTimeStamp) => {
     if (timestamp >= this.nextFrameTime) {
       if (this.controls.paused === false) {
         // Only run calculations when unpaused.
@@ -109,4 +108,5 @@ class game {
 
 // Start the game on the "game" canvas.
 const canvas = document.getElementById("game");
-const instance = new game(canvas);
+if (canvas === null) { throw new Error("Unable to get canvas."); }
+new game(canvas as HTMLCanvasElement);

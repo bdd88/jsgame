@@ -12,6 +12,11 @@ export class entities {
     active = new Set();
     /** Entities that can have simulation skipped some or all of the time. */
     inactive = new Set();
+    util;
+
+    constructor(util) {
+        this.util = util;
+    }
 
     /**
      * Place a new entity object into the location map.
