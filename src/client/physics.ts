@@ -10,10 +10,10 @@ This makes a 1.8m (5'11") tall character about 18 pixels tall in game.
  * An object with simulated physics based on real-world physics calculations.
  */
 export class physicsObject {
-    xv = null;
-    yv = null;
-    x = null;
-    y = null;
+    xv;
+    yv;
+    x;
+    y;
     gravity = 98.1;
 
     /**
@@ -23,7 +23,7 @@ export class physicsObject {
      * @param {integer} xv Horizontal velocity.
      * @param {integer} yv Vertical velocity.
      */
-    constructor(x, y, xv, yv) {
+    constructor(x: number, y: number, xv: number, yv: number) {
         this.x = x;
         this.y = y;
         this.xv = xv;
@@ -35,7 +35,7 @@ export class physicsObject {
      * @param {integer} xv Horizontal velocity.
      * @param {integer} yv Vertical velocity.
      */
-    addVelocity(xv, yv) {
+    addVelocity(xv: number, yv: number) {
         this.xv = this.xv + xv;
         this.yv = this.yv + yv;
     }
@@ -45,7 +45,7 @@ export class physicsObject {
      * @param {integer} xv Horizontal velocity.
      * @param {integer} yv Vertical velocity.
      */
-    multVelocity(xv, yv) {
+    multVelocity(xv: number, yv: number) {
         this.xv = this.xv * xv;
         this.yv = this.yv * yv;
     }
@@ -54,7 +54,7 @@ export class physicsObject {
      * Move an object based on position, velocity, time, and gravity.
      * @param {integer} timeDelta Time in MS since the last update.
      */
-    applyPhysics(timeDelta) {
+    applyPhysics(timeDelta: number) {
         /**
          * TODO:
          * - Mass
@@ -68,7 +68,7 @@ export class physicsObject {
         this.y = this.y + (this.yv * timestep);
     }
 
-    calcLine (x1, y1, x2, y2) {
+    calcLine (x1: number, y1: number, x2: number, y2: number) {
 
         // Set preference values based on distance to destination.
         const xPreferenceValue = Math.abs(x2 - x1);
