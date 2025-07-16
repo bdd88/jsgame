@@ -1,5 +1,5 @@
-import { button } from "./gui";
-import { mouseButton } from "./mouseButton";
+import { button } from "./gui.js";
+import { mouseButton } from "./mouseButton.js";
 
 export class mouse {
     x: number = 0;

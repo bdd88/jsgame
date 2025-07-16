@@ -1,6 +1,6 @@
-import {entity} from './entity';
-import { matter } from './matter/matter';
-import {util} from './util';
+import {entity} from './entity.js';
+import { matter } from './matter/matter.js';
+import {util} from './util.js';
 
 export class weather extends entity {
     type = "weather";

@@ -1,5 +1,5 @@
-import {draw} from './draw';
-import {mouse} from './mouse';
+import {draw} from './draw.js';
+import {mouse} from './mouse.js';
 
 export class button {
     type: string = "button";

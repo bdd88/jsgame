@@ -1,4 +1,4 @@
-import { button } from "./gui";
+import { button } from "./gui.js";
 import { menu } from "./gui";
 
 class mainMenu extends menu {

@@ -1,4 +1,4 @@
-import { liquid } from "../liquid";
+import { liquid } from "../liquid.js";
 
 export class water extends liquid {
     name = "water";

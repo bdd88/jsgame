@@ -1,5 +1,5 @@
-import { weather } from "../weather";
-import { water } from "../matter/liquid/water";
+import { weather } from "../weather.js";
+import { water } from "../matter/liquid/water.js";
 
 export class rainstorm extends weather {
     name = "rainstorm";

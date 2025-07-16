@@ -1,11 +1,11 @@
-import { draw } from "./draw";
-import { stats } from "./stats";
-import { util } from "./util";
-import { pauseButton } from "./menu";
-import { entities } from "./entities";
-import { controls } from "./controls";
-import { mouse } from "./mouse";
-import { keyboard } from "./keyboard";
+import { draw } from "./draw.js";
+import { stats } from "./stats.js";
+import { util } from "./util.js";
+import { pauseButton } from "./menu.js";
+import { entities } from "./entities.js";
+import { controls } from "./controls.js";
+import { mouse } from "./mouse.js";
+import { keyboard } from "./keyboard.js";
 
 class game {
   width: number = 1000;

@@ -1,7 +1,7 @@
-import { mouse } from "./mouse";
-import { keyboard } from "./keyboard";
-import { entities } from "./entities";
-import { sand } from './matter/granule/sand';
+import { mouse } from "./mouse.js";
+import { keyboard } from "./keyboard.js";
+import { entities } from "./entities.js";
+import { sand } from './matter/granule/sand.js';
 
 export class controls {
     mouse: mouse;

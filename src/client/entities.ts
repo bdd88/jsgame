@@ -1,5 +1,5 @@
-import { entity } from "./entity";
-import { util } from "./util";
+import { entity } from "./entity.js";
+import { util } from "./util.js";
 
 /** Collection of entities, and a location map of their positions on the x/y grid. */
 export class entities {

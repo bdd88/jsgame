@@ -10,8 +10,8 @@
 //     downRight: [ 1,  1]
 // };
 
-import { entities } from "./entities";
-import { entity } from "./entity";
+import { entities } from "./entities.js";
+import { entity } from "./entity.js";
 
 export class draw {
     ctx: CanvasRenderingContext2D;
