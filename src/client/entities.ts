@@ -32,11 +32,10 @@ export class entities {
         const location = x + ',' + y;
         const newLocation = targetX + ',' + targetY;
         if ( !this.locations.has(location) ) { return false; }
-
         if (this.locations.get(location) === undefined) { return false; }
         const entityInstance = this.locations.get(location) as entity;
         entityInstance.x = targetX;
-        entityInstance.x = targetY;
+        entityInstance.y = targetY;
         this.locations.delete(location);
         this.locations.set(newLocation, entityInstance);
         this.active.add(entityInstance);
